@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main style= padding: '40px', fontFamily: 'system-ui' >
-      <h1>📄 PDF Tools MCP Server</h1>
+      <h1>PDF Tools MCP Server</h1>
       <p>This server is running and ready to connect to Dust.</p>
       <h2>Available Tools:</h2>
       <ul>
@@ -12,7 +12,7 @@ export default function Home() {
       </ul>
       <h2>MCP Endpoint:</h2>
       <code style= background: '#f0f0f0', padding: '8px' >
-        {typeof window !== 'undefined' ? window.location.origin : ''}/sse
+        /sse
       </code>
     </main>
   );
