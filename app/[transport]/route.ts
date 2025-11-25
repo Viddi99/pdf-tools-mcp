@@ -9,13 +9,12 @@ const handler = createMcpHandler((server) => {
     "Extract and read all text content from a PDF file. Provide the PDF as a base64-encoded string.",
     {
       pdf_base64: z.string().describe("The PDF file encoded as base64"),
-      password: z.string().optional().describe("Password if the PDF is protected"),
     },
-    async ({ pdf_base64, password }) => {
+    async ({ pdf_base64 }) => {
       try {
         const pdfBuffer = Buffer.from(pdf_base64, "base64");
         const pdfParse = (await import("pdf-parse")).default;
-        const data = await pdfParse(pdfBuffer, { password });
+        const data = await pdfParse(pdfBuffer);
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, pageCount: data.numpages, text: data.text }, null, 2) }],
         };
@@ -30,15 +29,14 @@ const handler = createMcpHandler((server) => {
   // TOOL 2: Read PDF Form Fields
   server.tool(
     "read_pdf_fields",
-    "Extract all form field information from a PDF. Returns field names, types, and current values.",
+    "Extract all form field information from a PDF. Returns field names and types.",
     {
       pdf_base64: z.string().describe("The PDF file encoded as base64"),
-      password: z.string().optional().describe("Password if the PDF is protected"),
     },
-    async ({ pdf_base64, password }) => {
+    async ({ pdf_base64 }) => {
       try {
         const pdfBuffer = Buffer.from(pdf_base64, "base64");
-        const pdfDoc = await PDFDocument.load(pdfBuffer, { password, ignoreEncryption: false });
+        const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
         const form = pdfDoc.getForm();
         const fields = form.getFields().map((field) => ({
           name: field.getName(),
@@ -62,13 +60,12 @@ const handler = createMcpHandler((server) => {
     {
       pdf_base64: z.string().describe("The PDF file encoded as base64"),
       field_data: z.string().describe("JSON string mapping field names to values, e.g. {\"name\": \"John\", \"date\": \"2024-01-01\"}"),
-      password: z.string().optional().describe("Password if the PDF is protected"),
       flatten: z.boolean().optional().describe("If true, make fields non-editable"),
     },
-    async ({ pdf_base64, field_data, password, flatten }) => {
+    async ({ pdf_base64, field_data, flatten }) => {
       try {
         const pdfBuffer = Buffer.from(pdf_base64, "base64");
-        const pdfDoc = await PDFDocument.load(pdfBuffer, { password, ignoreEncryption: false });
+        const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
         const form = pdfDoc.getForm();
         const filledFields: string[] = [];
         const data = JSON.parse(field_data);
@@ -113,12 +110,11 @@ const handler = createMcpHandler((server) => {
     "Check a PDF form for missing required fields. Returns validation status.",
     {
       pdf_base64: z.string().describe("The PDF file encoded as base64"),
-      password: z.string().optional().describe("Password if the PDF is protected"),
     },
-    async ({ pdf_base64, password }) => {
+    async ({ pdf_base64 }) => {
       try {
         const pdfBuffer = Buffer.from(pdf_base64, "base64");
-        const pdfDoc = await PDFDocument.load(pdfBuffer, { password, ignoreEncryption: false });
+        const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
         const form = pdfDoc.getForm();
         const fields = form.getFields();
         const emptyFields: string[] = [];
